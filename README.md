@@ -2,6 +2,8 @@
 
 A static page built with Vite and the [Tailwind CSS v4 Vite plugin](https://tailwindcss.com/docs/installation/using-vite).
 
+The pink robin is centered on a blank page with a maximum width of 96px.
+
 ## Develop
 
 ```sh
