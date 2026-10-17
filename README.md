@@ -1,22 +1,30 @@
 # bords.world
 
-A static page built with the [Tailwind CSS v4 CLI](https://tailwindcss.com/docs/installation/tailwind-cli).
+A static page built with Vite and the [Tailwind CSS v4 Vite plugin](https://tailwindcss.com/docs/installation/using-vite).
+
+## Develop
+
+```sh
+npm ci
+npm run dev
+```
+
+Open the local URL printed by Vite (normally http://localhost:5173). Edit `src/`; CSS updates instantly and HTML edits reload the page automatically.
 
 ## Build and preview
 
 ```sh
-npm ci
 npm run build
-python3 -m http.server 8000 --directory dist
+npm run preview
 ```
 
-Open http://localhost:8000. Edit `src/` and rebuild to preview changes. The image card stays 480px wide, including on smaller screens.
+The production build goes into `dist/`. Preview serves it locally, normally at http://localhost:4173.
 
 ## Deploy
 
 Pushes to `main` build and publish `dist/` using GitHub Actions. Generated files and dependencies stay out of Git.
 
-GitHub Pages must use **GitHub Actions** as its source with **bords.world** as its custom domain. `src/CNAME` is copied to `dist/CNAME`; a CNAME file alone does not configure a custom domain for an Actions deployment.
+GitHub Pages must use **GitHub Actions** as its source with **bords.world** as its custom domain. `src/public/CNAME` is copied to `dist/CNAME`; a CNAME file alone does not configure a custom domain for an Actions deployment.
 
 Point the domain's apex DNS A records to GitHub Pages:
 
