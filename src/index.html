@@ -6,15 +6,23 @@
         <meta name="color-scheme" content="light" />
         <title>bords.world</title>
         <link rel="stylesheet" href="index.css" />
+        <script type="module" src="index.js"></script>
     </head>
     <body class="flex min-h-svh items-center justify-center">
-        <img
-            class="h-auto w-full max-w-24"
-            src="assets/pink-robin.png"
-            width="514"
-            height="633"
-            alt="A pink robin."
-            fetchpriority="high"
-        />
+        <button
+            id="robin"
+            type="button"
+            class="w-full max-w-24 cursor-pointer rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 motion-reduce:animate-none"
+            aria-label="Play the pink robin's song"
+        >
+            <img
+                class="h-auto w-full"
+                src="assets/pink_robin.png"
+                width="514"
+                height="633"
+                alt="A pink robin."
+                fetchpriority="high"
+            />
+        </button>
     </body>
 </html>

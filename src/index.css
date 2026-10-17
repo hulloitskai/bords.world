@@ -1,1 +1,13 @@
 @import "tailwindcss" source(".");
+
+@theme {
+    --animate-robin: robin-hop 650ms ease-out;
+
+    @keyframes robin-hop {
+        0%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-28px); }
+        55% { transform: translateY(4px); }
+        75% { transform: translateY(-8px); }
+        90% { transform: translateY(2px); }
+    }
+}
