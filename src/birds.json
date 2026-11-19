@@ -1,0 +1,132 @@
+[
+  {
+    "name": "Pink-Headed Fruit Dove",
+    "cardBackground": "./assets/cards/pink_headed_fruit_dove@2x.png",
+    "songs": [
+      "./assets/sounds/pink_headed_fruit_dove-song.mp3"
+    ],
+    "calls": [],
+    "billRattles": []
+  },
+  {
+    "name": "Mandarin Duck",
+    "cardBackground": "./assets/cards/mandarin_duck@2x.png",
+    "songs": [],
+    "calls": [
+      "./assets/sounds/mandarin_duck-calls_1.mp3",
+      "./assets/sounds/mandarin_duck-calls_2.mp3"
+    ],
+    "billRattles": []
+  },
+  {
+    "name": "Snowy Owl",
+    "cardBackground": "./assets/cards/snowy_owl@2x.png",
+    "songs": [
+      "./assets/sounds/snowy_owl-song.mp3"
+    ],
+    "calls": [
+      "./assets/sounds/snowy_owl-calls_1.mp3",
+      "./assets/sounds/snowy_owl-calls_2.mp3"
+    ],
+    "billRattles": []
+  },
+  {
+    "name": "Pacific Loon",
+    "cardBackground": "./assets/cards/pacific_loon@2x.png",
+    "songs": [
+      "./assets/sounds/pacific_loon-song.mp3"
+    ],
+    "calls": [
+      "./assets/sounds/pacific_loon-calls_1.mp3",
+      "./assets/sounds/pacific_loon-calls_2.mp3",
+      "./assets/sounds/pacific_loon-calls_3.mp3"
+    ],
+    "billRattles": []
+  },
+  {
+    "name": "Greater Roadrunner",
+    "cardBackground": "./assets/cards/greater_roadrunner@2x.png",
+    "songs": [
+      "./assets/sounds/greater_roadrunner-song.mp3"
+    ],
+    "calls": [
+      "./assets/sounds/greater_roadrunner-calls_1.mp3",
+      "./assets/sounds/greater_roadrunner-calls_2.mp3"
+    ],
+    "billRattles": [
+      "./assets/sounds/greater_roadrunner-bill_rattle.mp3"
+    ]
+  },
+  {
+    "name": "Tibetan Sand Plover",
+    "cardBackground": "./assets/cards/tibetan_sand_plover@2x.png",
+    "songs": [],
+    "calls": [
+      "./assets/sounds/tibetan_sand_plover-calls.mp3"
+    ],
+    "billRattles": []
+  },
+  {
+    "name": "White-Bellied Go-Away-Bird",
+    "cardBackground": "./assets/cards/white_bellied_go_away_bird@2x.png",
+    "songs": [],
+    "calls": [
+      "./assets/sounds/white_bellied_go_away_bird-calls.mp3"
+    ],
+    "billRattles": []
+  },
+  {
+    "name": "Spotted Sandgrouse",
+    "cardBackground": "./assets/cards/spotted_sandgrouse@2x.png",
+    "songs": [],
+    "calls": [
+      "./assets/sounds/spotted_sandgrouse-calls_1.mp3",
+      "./assets/sounds/spotted_sandgrouse-calls_2.mp3"
+    ],
+    "billRattles": []
+  },
+  {
+    "name": "Great Frigatebird",
+    "cardBackground": "./assets/cards/great_frigatebird@2x.png",
+    "songs": [
+      "./assets/sounds/great_frigatebird-song.mp3"
+    ],
+    "calls": [
+      "./assets/sounds/great_frigatebird-calls_1.mp3",
+      "./assets/sounds/great_frigatebird-calls_2.mp3"
+    ],
+    "billRattles": []
+  },
+  {
+    "name": "Great Eared-Nightjar",
+    "cardBackground": "./assets/cards/great_eared_nightjar@2x.png",
+    "songs": [
+      "./assets/sounds/great_eared_nightjar-song.mp3"
+    ],
+    "calls": [],
+    "billRattles": []
+  },
+  {
+    "name": "Northern Lapwing",
+    "cardBackground": "./assets/cards/northern_lapwing@2x.png",
+    "songs": [
+      "./assets/sounds/northern_lapwing-song.mp3"
+    ],
+    "calls": [
+      "./assets/sounds/northern_lapwing-calls.mp3"
+    ],
+    "billRattles": []
+  },
+  {
+    "name": "Resplendent Quetzal",
+    "cardBackground": "./assets/cards/resplendent_quetzal@2x.png",
+    "songs": [
+      "./assets/sounds/resplendent_quetzal-song.mp3"
+    ],
+    "calls": [
+      "./assets/sounds/resplendent_quetzal-calls_1.mp3",
+      "./assets/sounds/resplendent_quetzal-calls_2.mp3"
+    ],
+    "billRattles": []
+  }
+]
