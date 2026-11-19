@@ -212,6 +212,7 @@
   max-width: none;
   aspect-ratio: 629 / 880;
   object-fit: fill;
+  background-color: white;
   border-radius: 4% / 3%;
   box-shadow:
     0 7px 20px #2c251438,
