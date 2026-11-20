@@ -28,18 +28,16 @@ test("Deck navigation interrupts motion and settles only the final Selected Card
   })
   const selected = []
   const settled = []
-  const navigation = connectDeckNavigation(
-    deck,
-    Array(5).fill({ offsetWidth: 200 }),
-    {
-      onPosition() {},
-      onSelect: (index) => selected.push(index),
-      onSettle: (index) => settled.push(index),
-    }
-  )
+  const cards = Array.from({ length: 5 }, () => ({ offsetWidth: 200 }))
+  const navigation = connectDeckNavigation(deck, cards, {
+    onPosition() {},
+    onSelect: (index) => selected.push(index),
+    onSettle: (index) => settled.push(index),
+  })
 
-  function input(target, type, properties) {
+  function input(target, type, properties, hit = target) {
     const event = new Event(type, { cancelable: true })
+    Object.defineProperty(event, "target", { value: hit })
     target.dispatchEvent(Object.assign(event, properties))
     return event
   }
@@ -72,6 +70,23 @@ test("Deck navigation interrupts motion and settles only the final Selected Card
     expect(captured.size).toBe(0)
     expect(selected).toEqual([4, 0, 1, 2, 3])
     expect(settled).toEqual([1, 3])
+
+    navigation.jumpTo(0)
+    const pointer = { pointerId: 8, clientX: 200, clientY: 100 }
+    const press = { ...pointer, isPrimary: true, button: 0 }
+
+    input(deck, "pointerdown", press, cards[4])
+    input(deck, "pointerup", pointer)
+    frame(65)
+    expect(selected.at(-1)).toBe(4)
+    frame(260)
+    expect(settled.at(-1)).toBe(4)
+
+    input(deck, "pointerdown", press, cards[2])
+    input(deck, "pointermove", { ...pointer, clientX: 20 })
+    input(deck, "pointerup", { ...pointer, clientX: 20 })
+    frame(260)
+    expect(settled.at(-1)).toBe(1)
   } finally {
     navigation.disconnect()
   }

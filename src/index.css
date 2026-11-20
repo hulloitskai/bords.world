@@ -212,6 +212,7 @@
     0 7px 20px #2c251438,
     0 1px 3px #2c251438;
   pointer-events: none;
+  -webkit-touch-callout: none;
 }
 
 @media (pointer: fine) {

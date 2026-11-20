@@ -25,11 +25,14 @@ export function connectDeckNavigation(
   let frame = 0
   let wheelTimer: number | undefined
   let wheelPosition = 0
+  const tapSlop = 6
   let drag:
     | {
         id: number
         origin: number
         x: number
+        y: number
+        cardIndex: number
         lastX: number
         time: number
         speed: number
@@ -132,6 +135,8 @@ export function connectDeckNavigation(
       id: event.pointerId,
       origin: position,
       x: event.clientX,
+      y: event.clientY,
+      cardIndex: cards.indexOf(event.target as HTMLElement),
       lastX: event.clientX,
       time: event.timeStamp,
       speed: 0,
@@ -142,6 +147,11 @@ export function connectDeckNavigation(
 
   function onMove(event: PointerEvent) {
     if (!drag || event.pointerId !== drag.id) return
+    if (drag.cardIndex >= 0) {
+      if (Math.hypot(event.clientX - drag.x, event.clientY - drag.y) <= tapSlop)
+        return
+      drag.cardIndex = -1
+    }
     drag.speed =
       (drag.lastX - event.clientX) / Math.max(8, event.timeStamp - drag.time)
     drag.lastX = event.clientX
@@ -152,6 +162,18 @@ export function connectDeckNavigation(
 
   function onEnd(event: PointerEvent) {
     if (!drag || event.pointerId !== drag.id) return
+    if (
+      event.type === "pointerup" &&
+      drag.cardIndex >= 0 &&
+      Math.hypot(event.clientX - drag.x, event.clientY - drag.y) <= tapSlop
+    ) {
+      const offset =
+        wrapDeckPosition(drag.cardIndex - position + count / 2, count) -
+        count / 2
+      drag = undefined
+      settle(Math.round(position + offset))
+      return
+    }
     const flick =
       event.timeStamp - drag.time < 65
         ? Math.max(-70, Math.min(70, drag.speed * 90))

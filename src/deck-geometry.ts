@@ -65,6 +65,7 @@ export function cardStyleAt(offset: number, selected: boolean, count: number) {
 
   return {
     opacity,
+    pointerEvents: opacity > 0 ? "auto" : "none",
     transform:
       opacity === 0
         ? "none"
