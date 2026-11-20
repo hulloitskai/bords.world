@@ -159,24 +159,26 @@
   );
   --base-card-width: min(
     var(--card-max-width),
-    var(--width-limit),
     max(120px, var(--deck-budget) / var(--fan-height))
   );
-  --fit-overlap: clamp(
+  /* Let the centered panel sit a little deeper in the fan from 950px to 1381px. */
+  --panel-clearance: clamp(
     0px,
-    (var(--base-card-width) - 224px) * 8,
-    var(--base-card-width) * 0.72 - 85px
+    (1381px - 100cqw) / 20,
+    (1381px - 950px) / 20
+  );
+  --fit-overlap: max(
+    0px,
+    var(--base-card-width) * 0.72 - 85px - var(--panel-clearance)
   );
   --card-width: min(
     var(--card-max-width),
     var(--width-limit),
     max(120px, (var(--deck-budget) + var(--fit-overlap)) / var(--fan-height))
   );
-  /* The 400px controls can sit deeper in the fan’s open center as the cards grow. */
-  --controls-overlap: clamp(
+  --controls-overlap: max(
     0px,
-    (var(--card-width) - 224px) * 8,
-    var(--card-width) * 0.72 - 85px
+    var(--card-width) * 0.72 - 85px - var(--panel-clearance)
   );
   display: grid;
   grid-template-columns: minmax(0, 1fr);
