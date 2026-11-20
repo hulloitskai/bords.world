@@ -114,7 +114,7 @@ function SoundButton({
               role="tooltip"
               className="sound-tooltip rounded-md bg-primary px-2 py-1 text-xs text-primary-foreground"
             >
-              {title}
+              {multiple ? `${label} #${index + 1}` : label}
               <Tooltip.Arrow className="size-2 rotate-45 bg-primary data-[side=bottom]:-top-1 data-[side=left]:-right-1 data-[side=right]:-left-1 data-[side=top]:-bottom-1" />
             </Tooltip.Popup>
           </Tooltip.Positioner>
