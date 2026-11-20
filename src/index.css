@@ -276,6 +276,106 @@
   background: color-mix(in oklab, var(--primary) 75%, var(--background));
 }
 
+.sound-control[data-skip-visible] {
+  --skip-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --skip-open-shape: path("M 0 0 C 19 0 22 8 31 8 C 41 9 52 11 52 24 C 52 37 41 39 31 40 C 22 40 19 48 0 48 Z");
+  --skip-duration: 160ms;
+  --skip-delay: 55ms;
+  position: relative;
+  padding-inline-end: 0;
+  transition: padding-inline-end var(--skip-duration) var(--skip-ease-out) var(--skip-delay);
+}
+
+.sound-control[data-skip-visible="true"] {
+  --skip-duration: 240ms;
+  --skip-delay: 0ms;
+  padding-inline-end: 2rem;
+}
+
+.sound-control[data-skip-visible]::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 24px;
+  width: 52px;
+  height: 48px;
+  pointer-events: none;
+  background: linear-gradient(
+    color-mix(in srgb, var(--border) 38%, transparent),
+    color-mix(in srgb, var(--border) 24%, transparent)
+  );
+  clip-path: path("M 0 10 C 6 10 9 12 12 13 C 16 14 20 18 20 24 C 20 30 16 34 12 35 C 9 36 6 38 0 38 Z");
+  transition: clip-path var(--skip-duration) var(--skip-ease-out) var(--skip-delay);
+}
+
+.sound-control[data-skip-visible="true"]::before {
+  clip-path: var(--skip-open-shape);
+}
+
+.sound-control > .sound-skip {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 3rem;
+  margin-block: auto;
+  background: transparent;
+  color: var(--skip-ink, var(--foreground));
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 90ms var(--skip-ease-out),
+    visibility 0s 90ms;
+}
+
+.sound-control[data-skip-visible="true"] .sound-skip {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 125ms var(--skip-ease-out) 75ms,
+    visibility 0s 75ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sound-control[data-skip-visible] {
+    transition: none;
+  }
+
+  .sound-control[data-skip-visible]::before {
+    clip-path: var(--skip-open-shape);
+  }
+
+  .sound-control[data-skip-visible="false"]::before {
+    opacity: 0;
+    transition: none;
+  }
+
+  .sound-control[data-skip-visible="true"]::before {
+    transition: opacity 125ms var(--skip-ease-out);
+  }
+
+  .sound-control[data-skip-visible="false"] .sound-skip {
+    transition: none;
+  }
+
+  .sound-control[data-skip-visible="true"] .sound-skip {
+    transition-delay: 0ms;
+  }
+}
+
+.sound-skip svg {
+  fill: var(--background);
+}
+
+.sound-skip:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -5px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sound-skip:not(:hover, :focus-visible) svg {
+    stroke-opacity: 0.8;
+  }
+}
+
 .playback-ring {
   position: absolute;
   inset: 0;
@@ -339,6 +439,7 @@
   }
 
   .bird-navigation {
+    --skip-ink: #24231c;
     width: 100%;
     margin-block-start: 0;
     background: #f9f6e9;

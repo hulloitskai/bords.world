@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "layout-transition",
+        "value": "*",
+        "files": [
+          "src/index.css"
+        ],
+        "createdAt": "2026-11-20T04:46:31.033Z",
+        "reason": "Agent: the user requested the controls row shift as the cutout expands, with no space reserved when closed. The short transition reallocates space in the controls row and is disabled for reduced motion. Desktop and narrow mobile viewport checks passed."
+      }
+    ]
+  }
+}

@@ -47,6 +47,8 @@ function SoundButton({
   icon,
   audio,
   playing,
+  playbackTooltip,
+  onDismissPlaybackTooltip,
   onToggle,
   onPlay,
 }: {
@@ -55,15 +57,19 @@ function SoundButton({
   icon: ReactNode
   audio: RefObject<HTMLAudioElement | null>
   playing: string | null
+  playbackTooltip: string | null
+  onDismissPlaybackTooltip: () => void
   onToggle: (url: string) => void
   onPlay: (url: string) => void
 }) {
   const [index, setIndex] = useState(0)
   const [announcement, setAnnouncement] = useState("")
+  const [tooltipOpen, setTooltipOpen] = useState(false)
   const multiple = paths.length > 1
   const title = multiple ? `${label} ${index + 1} of ${paths.length}` : label
   const url = recordings[paths[index]]
-  const active = playing === url
+  const active = paths.some((path) => recordings[path] === playing)
+  const showPlaybackTooltip = playing === url && playbackTooltip === url
 
   function playNext() {
     const next = (index + 1) % paths.length
@@ -73,8 +79,19 @@ function SoundButton({
   }
 
   return (
-    <div className="flex items-center">
-      <Tooltip.Root>
+    <div
+      className="sound-control flex items-center"
+      data-skip-visible={multiple ? active : undefined}
+    >
+      <Tooltip.Root
+        open={tooltipOpen || showPlaybackTooltip}
+        onOpenChange={(open, { reason }) => {
+          setTooltipOpen(open)
+          if (showPlaybackTooltip && reason === "escape-key") {
+            onDismissPlaybackTooltip()
+          }
+        }}
+      >
         <Tooltip.Trigger
           delay={250}
           closeOnClick={false}
@@ -117,14 +134,15 @@ function SoundButton({
         <Button
           variant="ghost"
           size="icon-xs"
-          className="group/skip h-11 hover:bg-transparent focus-visible:border-transparent focus-visible:ring-0 active:not-aria-[haspopup]:translate-y-0 dark:hover:bg-transparent"
+          className="sound-skip size-11 rounded-full focus-visible:border-transparent focus-visible:ring-0 active:not-aria-[haspopup]:translate-y-0"
           aria-label={`Play next ${label.toLowerCase()} recording`}
+          inert={!active}
           onClick={playNext}
         >
           <HugeiconsIcon
             icon={Forward02Icon}
             aria-hidden="true"
-            className="size-4 text-black/50 group-hover/skip:text-black/85 group-focus-visible/skip:text-black/85 forced-colors:group-focus-visible/skip:text-[Highlight] forced-colors:group-focus-visible/skip:[forced-color-adjust:none]"
+            className="size-4 -translate-x-2"
           />
         </Button>
       )}
@@ -135,10 +153,12 @@ function SoundButton({
 export function App() {
   const stage = useRef<HTMLDivElement>(null)
   const audio = useRef<HTMLAudioElement>(null)
+  const playbackTooltipTimeout = useRef<number>(undefined)
   const navigation = useRef<HTMLDivElement>(null)
   const step = useRef<(direction: number, instant: boolean) => void>(() => {})
   const [selected, setSelected] = useState(0)
   const [playing, setPlaying] = useState<string | null>(null)
+  const [playbackTooltip, setPlaybackTooltip] = useState<string | null>(null)
   const [failed, setFailed] = useState(false)
   const [autoPlay, setAutoPlay] = useState({ enabled: false, activation: 0 })
   const bird = birds[selected]
@@ -238,6 +258,7 @@ export function App() {
     onHashChange()
     window.addEventListener("hashchange", onHashChange)
     return () => {
+      window.clearTimeout(playbackTooltipTimeout.current)
       deckNavigation.disconnect()
       player.pause()
       controlsObserver.disconnect()
@@ -321,6 +342,8 @@ export function App() {
                       icon={icon}
                       audio={audio}
                       playing={playing}
+                      playbackTooltip={playbackTooltip}
+                      onDismissPlaybackTooltip={() => setPlaybackTooltip(null)}
                       onToggle={toggleSound}
                       onPlay={playSound}
                     />
@@ -357,13 +380,23 @@ export function App() {
         <audio
           ref={audio}
           preload="none"
-          onPlay={(event) =>
-            setPlaying(event.currentTarget.getAttribute("src"))
-          }
+          onPlaying={(event) => {
+            const player = event.currentTarget
+            const url = player.getAttribute("src")
+            if (player.paused || url === playing) return
+            setPlaying(url)
+            setPlaybackTooltip(url)
+            window.clearTimeout(playbackTooltipTimeout.current)
+            playbackTooltipTimeout.current = window.setTimeout(
+              () => setPlaybackTooltip(null),
+              1100
+            )
+          }}
           onPause={(event) => {
             if (event.currentTarget.paused) setPlaying(null)
           }}
           onEnded={() => setPlaying(null)}
+          onError={() => setPlaying(null)}
         />
       </div>
     </main>
