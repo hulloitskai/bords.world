@@ -18,12 +18,20 @@ const images = import.meta.glob<string>("./assets/cards/*.png", {
 })
 const count = birds.length
 
+function birdIndexForHash(hash: string) {
+  return Math.max(
+    0,
+    birds.findIndex(({ id }) => `#${id}` === hash)
+  )
+}
+
 export function App() {
   const stage = useRef<HTMLDivElement>(null)
   const recordingControls = useRef<RecordingControlsHandle>(null)
   const navigation = useRef<HTMLDivElement>(null)
   const step = useRef<(direction: number, instant: boolean) => void>(() => {})
-  const [selected, setSelected] = useState(0)
+  const [openingIndex] = useState(() => birdIndexForHash(window.location.hash))
+  const [selected, setSelected] = useState(openingIndex)
   const bird = birds[selected]
 
   useLayoutEffect(() => {
@@ -75,10 +83,7 @@ export function App() {
 
     function onHashChange() {
       observedHash = window.location.hash
-      const next = Math.max(
-        0,
-        birds.findIndex(({ id }) => `#${id}` === observedHash)
-      )
+      const next = birdIndexForHash(observedHash)
       deckNavigation.jumpTo(next)
       syncPage(next)
     }
@@ -100,18 +105,24 @@ export function App() {
     >
       <div className="bird-stage" aria-hidden="true">
         <div className="bird-deck" ref={stage}>
-          {birds.map(({ cardBackground }, index) => (
-            <img
-              key={cardBackground}
-              className="bird-card"
-              src={images[cardBackground]}
-              alt=""
-              width={cardArtwork.width}
-              height={cardArtwork.height}
-              fetchPriority={index === 0 ? "high" : "auto"}
-              draggable={false}
-            />
-          ))}
+          {birds.map(({ cardBackground }, index) => {
+            const offset = wrapDeckPosition(index - openingIndex, count)
+            const distance = Math.min(offset, count - offset)
+            return (
+              <img
+                key={cardBackground}
+                className="bird-card"
+                src={images[cardBackground]}
+                alt=""
+                width={cardArtwork.width}
+                height={cardArtwork.height}
+                fetchPriority={
+                  distance === 0 ? "high" : distance === 1 ? "auto" : "low"
+                }
+                draggable={false}
+              />
+            )
+          })}
         </div>
       </div>
       <div className="bird-navigation" ref={navigation}>
