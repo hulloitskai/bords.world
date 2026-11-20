@@ -146,6 +146,7 @@
   --fan-gutter-y: 12px;
   --top-pad: max(12px, env(safe-area-inset-top));
   --bottom-pad: max(16px, env(safe-area-inset-bottom));
+  --viewport-height: 100dvh;
   --fan-frame-width: 100cqw;
   --focus-frame-width: calc(100cqw - 2 * var(--fan-gutter-x));
   --width-limit: min(
@@ -153,7 +154,7 @@
     var(--focus-frame-width)
   );
   --deck-budget: calc(
-    100dvh - var(--top-pad) - var(--bottom-pad) -
+    var(--viewport-height) - var(--top-pad) - var(--bottom-pad) -
       var(--controls-height, 128px) - 2 * var(--fan-gutter-y)
   );
   --base-card-width: min(
@@ -180,7 +181,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-content: center;
-  min-block-size: 100dvh;
+  min-block-size: var(--viewport-height);
   container-type: inline-size;
   padding-block: var(--top-pad) var(--bottom-pad);
 }
@@ -318,6 +319,7 @@
 
 @media (max-width: 600px) {
   .bird-carousel {
+    --viewport-height: 100svh;
     --center-selected-card: 1;
     --fan-height: calc(var(--resting-fan-height) + 2 * var(--motion-clearance));
     --fan-frame-width: max(960px, 100cqw);
@@ -332,11 +334,13 @@
     --bottom-pad: 0px;
     --fit-overlap: 0px;
     --controls-overlap: 0px;
-    grid-template-rows: minmax(min-content, 1fr) auto;
-    align-content: normal;
+    /* Safari can misplace the grid's controls row when recordings change. */
+    display: flex;
+    flex-direction: column;
   }
 
   .bird-stage {
+    flex-grow: 1;
     min-block-size: calc(
       var(--card-width) * var(--fan-height) + 2 * var(--fan-gutter-y)
     );
