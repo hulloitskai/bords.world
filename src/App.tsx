@@ -209,6 +209,7 @@ export function App() {
     let frame = 0
     let wheelTimer: number | undefined
     let wheelPosition = 0
+    let observedHash = window.location.hash
     let drag:
       | {
           id: number
@@ -220,6 +221,16 @@ export function App() {
           pixelsPerCard: number
         }
       | undefined
+
+    function syncPage(index: number) {
+      const { id, name } = birds[index]
+      document.title = `${name} | bords.world`
+      const hash = `#${id}`
+      // Native fragment navigation can change the URL before hashchange fires.
+      if (hash === observedHash || window.location.hash !== observedHash) return
+      window.history.replaceState(window.history.state, "", hash)
+      observedHash = hash
+    }
 
     function draw(value: number) {
       position = value
@@ -236,6 +247,7 @@ export function App() {
         setPlaying(null)
         setFailed(false)
         setSelected(front)
+        syncPage(front)
       }
     }
 
@@ -358,7 +370,23 @@ export function App() {
       settle(next)
     }
 
-    draw(0)
+    function onHashChange() {
+      observedHash = window.location.hash
+      const next = Math.max(
+        0,
+        birds.findIndex(({ id }) => `#${id}` === observedHash)
+      )
+      const pointerId = drag?.id
+      drag = undefined
+      if (pointerId !== undefined && deck.hasPointerCapture(pointerId)) {
+        deck.releasePointerCapture(pointerId)
+      }
+      settle(next, true)
+      syncPage(next)
+    }
+
+    onHashChange()
+    window.addEventListener("hashchange", onHashChange)
     window.addEventListener("keydown", onKey)
     window.addEventListener("wheel", onWheel, { passive: false })
     deck.addEventListener("pointerdown", onDown)
@@ -370,6 +398,7 @@ export function App() {
       stop()
       player.pause()
       controlsObserver.disconnect()
+      window.removeEventListener("hashchange", onHashChange)
       window.removeEventListener("keydown", onKey)
       window.removeEventListener("wheel", onWheel)
       deck.removeEventListener("pointerdown", onDown)

@@ -1,5 +1,6 @@
 [
   {
+    "id": "pink-headed-fruit-dove",
     "name": "Pink-Headed Fruit Dove",
     "cardBackground": "./assets/cards/pink_headed_fruit_dove@2x.png",
     "songs": [
@@ -9,6 +10,7 @@
     "billRattles": []
   },
   {
+    "id": "mandarin-duck",
     "name": "Mandarin Duck",
     "cardBackground": "./assets/cards/mandarin_duck@2x.png",
     "songs": [],
@@ -19,6 +21,7 @@
     "billRattles": []
   },
   {
+    "id": "snowy-owl",
     "name": "Snowy Owl",
     "cardBackground": "./assets/cards/snowy_owl@2x.png",
     "songs": [
@@ -31,6 +34,7 @@
     "billRattles": []
   },
   {
+    "id": "pacific-loon",
     "name": "Pacific Loon",
     "cardBackground": "./assets/cards/pacific_loon@2x.png",
     "songs": [
@@ -44,6 +48,7 @@
     "billRattles": []
   },
   {
+    "id": "greater-roadrunner",
     "name": "Greater Roadrunner",
     "cardBackground": "./assets/cards/greater_roadrunner@2x.png",
     "songs": [
@@ -58,6 +63,7 @@
     ]
   },
   {
+    "id": "tibetan-sand-plover",
     "name": "Tibetan Sand Plover",
     "cardBackground": "./assets/cards/tibetan_sand_plover@2x.png",
     "songs": [],
@@ -67,6 +73,7 @@
     "billRattles": []
   },
   {
+    "id": "white-bellied-go-away-bird",
     "name": "White-Bellied Go-Away-Bird",
     "cardBackground": "./assets/cards/white_bellied_go_away_bird@2x.png",
     "songs": [],
@@ -76,6 +83,7 @@
     "billRattles": []
   },
   {
+    "id": "spotted-sandgrouse",
     "name": "Spotted Sandgrouse",
     "cardBackground": "./assets/cards/spotted_sandgrouse@2x.png",
     "songs": [],
@@ -86,6 +94,7 @@
     "billRattles": []
   },
   {
+    "id": "great-frigatebird",
     "name": "Great Frigatebird",
     "cardBackground": "./assets/cards/great_frigatebird@2x.png",
     "songs": [
@@ -98,6 +107,7 @@
     "billRattles": []
   },
   {
+    "id": "great-eared-nightjar",
     "name": "Great Eared-Nightjar",
     "cardBackground": "./assets/cards/great_eared_nightjar@2x.png",
     "songs": [
@@ -107,6 +117,7 @@
     "billRattles": []
   },
   {
+    "id": "northern-lapwing",
     "name": "Northern Lapwing",
     "cardBackground": "./assets/cards/northern_lapwing@2x.png",
     "songs": [
@@ -118,6 +129,7 @@
     "billRattles": []
   },
   {
+    "id": "resplendent-quetzal",
     "name": "Resplendent Quetzal",
     "cardBackground": "./assets/cards/resplendent_quetzal@2x.png",
     "songs": [
