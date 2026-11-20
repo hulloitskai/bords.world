@@ -2,7 +2,7 @@
 
 An illustrated bird card carousel built with React, Vite, and shadcn. Browse with the mouse wheel, a swipe, or the previous and next buttons.
 
-`src/birds.json` lists card order, display names, artwork, and recordings. Vite resolves the artwork and recordings through `import.meta.glob` in `src/App.tsx`.
+`src/birds.json` lists card order, display names, artwork, and recordings. Vite resolves the artwork and recordings through `import.meta.glob` in `src/App.tsx` and `src/components/recording-controls.tsx`, respectively.
 
 ## Develop
 
@@ -12,6 +12,8 @@ npm run dev
 ```
 
 Open the local URL printed by Vite (normally http://localhost:5173). Edit `src/`; CSS updates instantly and HTML edits reload the page automatically.
+
+With Playwright Chromium installed and Vite running, use `bun scripts/check-recording-controls.js` to check playback and keyboard Skip at 320 px.
 
 ## Download eBird sounds
 
