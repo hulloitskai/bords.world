@@ -15,13 +15,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     env:
       PAGES_ARTIFACT_NAME: github-pages-${{ github.run_attempt }}
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      artifact_name: ${{ steps.upload.outputs.artifact_name }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -33,12 +32,22 @@ jobs:
           HUSKY: "0"
       - run: npm run build
       - uses: actions/configure-pages@v5
+      - name: Set artifact name
+        id: upload
+        run: echo "artifact_name=$PAGES_ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-pages-artifact@v3
         with:
           name: ${{ env.PAGES_ARTIFACT_NAME }}
           path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
         with:
-          artifact_name: ${{ env.PAGES_ARTIFACT_NAME }}
+          artifact_name: ${{ needs.build.outputs.artifact_name }}
