@@ -15,6 +15,7 @@ import { BirdsongIcon } from "@/components/birdsong-icon"
 import { PlaybackRing } from "@/components/playback-ring"
 import { Button } from "@/components/ui/button"
 import birds from "./birds.json"
+import { cardArtwork, cardStyleAt, fanSizing } from "./deck-geometry"
 
 const images = import.meta.glob<string>("./assets/cards/*.png", {
   eager: true,
@@ -33,57 +34,6 @@ const soundTypes = [
 ] as const
 const count = birds.length
 const wrap = (index: number) => ((index % count) + count) % count
-
-const cardRatio = 880 / 629
-const visibleDistance = 3.7
-const tiltPerCard = 8
-const backScale = 0.86
-const frontLift = 0.09
-const fanSpread = 1.48
-
-// Measure the fan in units of card width, so the same geometry works at any size.
-function cardPose(offset: number, spread: number) {
-  const proximity = Math.max(0, 1 - Math.abs(offset))
-  const angle = offset * 0.4
-  return {
-    x: Math.sin(angle) * spread,
-    y: 0.68 * (1 - Math.cos(angle)) - proximity * frontLift,
-    rotation: offset * tiltPerCard,
-    scale: backScale + (1 - backScale) * proximity,
-  }
-}
-
-function fanBounds(spread: number) {
-  const outer = cardPose(visibleDistance, spread)
-  const radians = (outer.rotation * Math.PI) / 180
-  const sin = Math.sin(radians)
-  const cos = Math.cos(radians)
-
-  // Beyond one card the scale is constant, and both projected half-extents
-  // and outward shifts grow up to the visibility cutoff.
-  const right = outer.x + (outer.scale * (cos + cardRatio * sin)) / 2
-  const bottom = outer.y + (outer.scale * (sin + cardRatio * cos)) / 2
-
-  // Inside one card, the lift drops faster than rotation can raise a corner.
-  // Outside that range, the scaled half-diagonal is shorter than this depth.
-  const top = cardRatio / 2 + frontLift
-
-  const restingOuter = cardPose(Math.ceil(visibleDistance) - 1, spread)
-  const restingAngle = (restingOuter.rotation * Math.PI) / 180
-  const restingBottom =
-    restingOuter.y +
-    (restingOuter.scale *
-      (Math.sin(restingAngle) + cardRatio * Math.cos(restingAngle))) /
-      2
-  const centerY = (top - restingBottom) / 2
-
-  return {
-    width: 2 * right,
-    restingHeight: top + restingBottom,
-    motionClearance: bottom - restingBottom,
-    centerY,
-  }
-}
 
 function SoundButton({
   paths,
@@ -242,16 +192,6 @@ export function App() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)")
     const controls = navigation.current!
     const layout = controls.parentElement!
-    const bounds = fanBounds(fanSpread)
-    layout.style.setProperty("--fan-width", String(bounds.width))
-    layout.style.setProperty(
-      "--resting-fan-height",
-      String(bounds.restingHeight)
-    )
-    layout.style.setProperty(
-      "--motion-clearance",
-      String(bounds.motionClearance)
-    )
 
     function measureControls() {
       layout.style.setProperty(
@@ -286,28 +226,7 @@ export function App() {
       const front = wrap(Math.round(value))
       cards.forEach((card, index) => {
         const offset = wrap(index - value + count / 2) - count / 2
-        const distance = Math.abs(offset)
-        const opacity = Math.min(
-          1,
-          Math.max(0, (visibleDistance - distance) * 2)
-        )
-        const { x, y, rotation, scale } = cardPose(offset, fanSpread)
-        const translateY = ((y + bounds.centerY) / cardRatio) * 100
-        // Center the mobile focal card and taper the shift to zero at the fan's edge.
-        const centerOffset =
-          ((frontLift - bounds.centerY) / cardRatio) *
-          100 *
-          Math.max(0, 1 - (distance / visibleDistance) ** 2)
-        card.style.opacity = String(opacity)
-        card.style.transform =
-          opacity === 0
-            ? "none"
-            : `translate(${x * 100}%, calc(${translateY}% + ${centerOffset}% * var(--center-selected-card, 0))) rotate(${rotation}deg) scale(${scale})`
-        card.style.zIndex = String(
-          index === front
-            ? count * 100 + 1
-            : Math.round((count - distance) * 100)
-        )
+        Object.assign(card.style, cardStyleAt(offset, index === front, count))
       })
       if (current !== front) {
         current = front
@@ -462,7 +381,11 @@ export function App() {
   }, [])
 
   return (
-    <main className="bird-carousel" aria-label="Bird card carousel">
+    <main
+      className="bird-carousel"
+      aria-label="Bird card carousel"
+      style={fanSizing}
+    >
       <div className="bird-stage" aria-hidden="true">
         <div className="bird-deck" ref={stage}>
           {birds.map(({ cardBackground }, index) => (
@@ -471,8 +394,8 @@ export function App() {
               className="bird-card"
               src={images[cardBackground]}
               alt=""
-              width={629}
-              height={880}
+              width={cardArtwork.width}
+              height={cardArtwork.height}
               fetchPriority={index === 0 ? "high" : "auto"}
               draggable={false}
             />

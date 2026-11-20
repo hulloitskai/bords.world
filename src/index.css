@@ -132,11 +132,6 @@
   }
 }
 .bird-carousel {
-  /* Display the @2x artwork at half its pixel width. */
-  --card-max-width: 314.5px;
-  --fan-width: 4.3;
-  --resting-fan-height: 1.95;
-  --motion-clearance: 0.196;
   --fan-height: calc(var(--resting-fan-height) + var(--motion-clearance));
   --fan-gutter-x: max(
     12px,
@@ -213,7 +208,7 @@
   width: var(--card-width);
   height: auto;
   max-width: none;
-  aspect-ratio: 629 / 880;
+  aspect-ratio: var(--card-aspect-ratio);
   object-fit: fill;
   background-color: white;
   border-radius: 4% / 3%;
@@ -331,7 +326,7 @@
           100cqw - 2 *
             max(4px, env(safe-area-inset-left), env(safe-area-inset-right))
         ) /
-        1.69
+        var(--mobile-focus-width)
     );
     --bottom-pad: 0px;
     --fit-overlap: 0px;
