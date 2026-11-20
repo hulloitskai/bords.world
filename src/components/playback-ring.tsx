@@ -24,15 +24,31 @@ export function PlaybackRing({
 
     function draw() {
       cancelAnimationFrame(frame)
-      const hasProgress = player.getAttribute("src") === url && !player.error &&
-        Number.isFinite(player.duration) && player.duration > 0 && !player.ended
-      const elapsed = hasProgress ? Math.min(1, player.currentTime / player.duration) : 0
+      const hasProgress =
+        player.getAttribute("src") === url &&
+        !player.error &&
+        Number.isFinite(player.duration) &&
+        player.duration > 0 &&
+        !player.ended
+      const elapsed = hasProgress
+        ? Math.min(1, player.currentTime / player.duration)
+        : 0
       arc.setAttribute("stroke-dasharray", `${elapsed * length} 100`)
       arc.toggleAttribute("data-filled", elapsed > 0)
-      if (hasProgress && !player.paused && !reduced.matches) frame = requestAnimationFrame(draw)
+      if (hasProgress && !player.paused && !reduced.matches)
+        frame = requestAnimationFrame(draw)
     }
 
-    const events = ["loadedmetadata", "timeupdate", "durationchange", "playing", "pause", "ended", "emptied", "error"]
+    const events = [
+      "loadedmetadata",
+      "timeupdate",
+      "durationchange",
+      "playing",
+      "pause",
+      "ended",
+      "emptied",
+      "error",
+    ]
     for (const event of events) player.addEventListener(event, draw)
     reduced.addEventListener("change", draw)
     draw()
@@ -44,11 +60,18 @@ export function PlaybackRing({
   }, [audio, url, length])
 
   return (
-    <svg className="size-10 playback-ring" viewBox="0 0 40 40" aria-hidden="true">
+    <svg
+      className="playback-ring size-10"
+      viewBox="0 0 40 40"
+      aria-hidden="true"
+    >
       {Array.from({ length: count }, (_, track) => (
         <circle
           key={track}
-          cx="20" cy="20" r="18" pathLength="100"
+          cx="20"
+          cy="20"
+          r="18"
+          pathLength="100"
           className="playback-ring-track"
           strokeDasharray={count > 1 ? `${length} 100` : undefined}
           strokeDashoffset={-(track * segment + gap / 2)}
@@ -56,7 +79,10 @@ export function PlaybackRing({
       ))}
       <circle
         ref={fill}
-        cx="20" cy="20" r="18" pathLength="100"
+        cx="20"
+        cy="20"
+        r="18"
+        pathLength="100"
         className="playback-ring-fill"
         strokeDashoffset={-((count > 1 ? index : 0) * segment + gap / 2)}
       />

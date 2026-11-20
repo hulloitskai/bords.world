@@ -157,11 +157,7 @@
     max(120px, var(--deck-budget) / var(--fan-height))
   );
   /* Let the centered panel sit a little deeper in the fan from 950px to 1381px. */
-  --panel-clearance: clamp(
-    0px,
-    (1381px - 100cqw) / 20,
-    (1381px - 950px) / 20
-  );
+  --panel-clearance: clamp(0px, (1381px - 100cqw) / 20, (1381px - 950px) / 20);
   --fit-overlap: max(
     0px,
     var(--base-card-width) * 0.72 - 85px - var(--panel-clearance)

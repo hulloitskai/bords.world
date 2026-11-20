@@ -9,12 +9,15 @@
 
 .sound-control[data-skip-visible] {
   --skip-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --skip-open-shape: path("M 0 0 C 19 0 22 8 31 8 C 41 9 52 11 52 24 C 52 37 41 39 31 40 C 22 40 19 48 0 48 Z");
+  --skip-open-shape: path(
+    "M 0 0 C 19 0 22 8 31 8 C 41 9 52 11 52 24 C 52 37 41 39 31 40 C 22 40 19 48 0 48 Z"
+  );
   --skip-duration: 160ms;
   --skip-delay: 55ms;
   position: relative;
   padding-inline-end: 0;
-  transition: padding-inline-end var(--skip-duration) var(--skip-ease-out) var(--skip-delay);
+  transition: padding-inline-end var(--skip-duration) var(--skip-ease-out)
+    var(--skip-delay);
 }
 
 .sound-control[data-skip-visible="true"] {
@@ -35,8 +38,11 @@
     color-mix(in srgb, var(--border) 38%, transparent),
     color-mix(in srgb, var(--border) 24%, transparent)
   );
-  clip-path: path("M 0 10 C 6 10 9 12 12 13 C 16 14 20 18 20 24 C 20 30 16 34 12 35 C 9 36 6 38 0 38 Z");
-  transition: clip-path var(--skip-duration) var(--skip-ease-out) var(--skip-delay);
+  clip-path: path(
+    "M 0 10 C 6 10 9 12 12 13 C 16 14 20 18 20 24 C 20 30 16 34 12 35 C 9 36 6 38 0 38 Z"
+  );
+  transition: clip-path var(--skip-duration) var(--skip-ease-out)
+    var(--skip-delay);
 }
 
 .sound-control[data-skip-visible="true"]::before {

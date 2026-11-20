@@ -6,12 +6,16 @@ An illustrated bird card carousel built with React, Vite, and shadcn. Browse wit
 
 ## Develop
 
+Use Node.js 24.15 or later.
+
 ```sh
 npm ci
 npm run dev
 ```
 
 Open the local URL printed by Vite (normally http://localhost:5173). Edit `src/`; CSS updates instantly and HTML edits reload the page automatically.
+
+`npm ci` installs a Husky hook that lints staged JavaScript, TypeScript, `package.json`, and `mise.toml`. The hook also formats staged files supported by Prettier, including both config files. Use `npm run lint` and `npm run format:check` to check the whole project, or `npm run format` to apply formatting.
 
 With Playwright Chromium installed and Vite running, use `bun scripts/check-recording-controls.js` to check playback and keyboard Skip at 320 px.
 

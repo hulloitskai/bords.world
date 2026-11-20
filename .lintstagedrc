@@ -1,0 +1,7 @@
+{
+  "@(*.js|*.mjs|*.cjs|*.ts|*.tsx|package.json|mise.toml)": [
+    "eslint --max-warnings=0",
+    "prettier --write"
+  ],
+  "!(*.js|*.mjs|*.cjs|*.ts|*.tsx|package.json|mise.toml)": "prettier --ignore-unknown --write"
+}

@@ -6,9 +6,7 @@
       {
         "rule": "layout-transition",
         "value": "*",
-        "files": [
-          "src/components/recording-controls.css"
-        ],
+        "files": ["src/components/recording-controls.css"],
         "createdAt": "2026-11-20T05:05:41.970Z",
         "reason": "Agent: this existing transition reserves actual row space in sync with the Skip cutout. The slot takes zero space when closed, and reduced motion disables the padding transition."
       }
