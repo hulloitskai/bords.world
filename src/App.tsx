@@ -1,6 +1,7 @@
 import {
   type ReactNode,
   type RefObject,
+  useEffectEvent,
   useLayoutEffect,
   useRef,
   useState,
@@ -14,6 +15,7 @@ import { BirdCallIcon } from "@/components/bird-call-icon"
 import { BirdsongIcon } from "@/components/birdsong-icon"
 import { PlaybackRing } from "@/components/playback-ring"
 import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
 import birds from "./birds.json"
 import { cardArtwork, cardStyleAt, fanSizing } from "./deck-geometry"
 
@@ -167,14 +169,11 @@ export function App() {
   const [selected, setSelected] = useState(0)
   const [playing, setPlaying] = useState<string | null>(null)
   const [failed, setFailed] = useState(false)
+  const [autoPlay, setAutoPlay] = useState({ enabled: false, activation: 0 })
   const bird = birds[selected]
 
-  function toggleSound(url: string) {
+  function playSound(url: string) {
     const player = audio.current!
-    if (player.getAttribute("src") === url && !player.paused) {
-      player.pause()
-      return
-    }
     setFailed(false)
     if (player.getAttribute("src") !== url || player.error) player.src = url
     void player.play().catch((error) => {
@@ -184,6 +183,26 @@ export function App() {
       }
     })
   }
+
+  function toggleSound(url: string) {
+    const player = audio.current!
+    if (player.getAttribute("src") === url && !player.paused) player.pause()
+    else playSound(url)
+  }
+
+  function playFirstSound(index: number) {
+    for (const { key } of soundTypes) {
+      const url = recordings[birds[index][key][0]]
+      if (url) {
+        playSound(url)
+        return
+      }
+    }
+  }
+
+  const playSettledBird = useEffectEvent((index: number) => {
+    if (autoPlay.enabled) playFirstSound(index)
+  })
 
   useLayoutEffect(() => {
     const deck = stage.current!
@@ -206,6 +225,7 @@ export function App() {
     let position = 0
     let target = 0
     let current = 0
+    let settled = 0
     let frame = 0
     let wheelTimer: number | undefined
     let wheelPosition = 0
@@ -257,21 +277,29 @@ export function App() {
       wheelTimer = undefined
     }
 
+    function finishSettling(next: number) {
+      const index = wrap(next)
+      draw(index)
+      target = position
+      if (index !== settled) {
+        settled = index
+        playSettledBird(index)
+      }
+    }
+
     function settle(next: number, instant = false) {
       stop()
       target = next
       const origin = position
       if (instant || reduced.matches || origin === next) {
-        draw(wrap(next))
-        target = position
+        finishSettling(next)
         return
       }
       const start = performance.now()
       function tick(now: number) {
         const progress = Math.min(1, (now - start) / 260)
         if (progress === 1) {
-          draw(wrap(next))
-          target = position
+          finishSettling(next)
           return
         }
         draw(origin + (next - origin) * (1 - (1 - progress) ** 3))
@@ -466,28 +494,52 @@ export function App() {
           </div>
         </div>
         <div
-          key={bird.cardBackground}
-          className="mt-3 flex flex-wrap justify-center gap-4"
+          className="mt-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center"
           role="group"
           aria-label={`${bird.name} recordings`}
           aria-describedby="sound-instructions"
         >
-          <Tooltip.Provider>
-            {soundTypes.map(
-              ({ key, label, icon }) =>
-                bird[key].length > 0 && (
-                  <SoundButton
-                    key={key}
-                    paths={bird[key]}
-                    label={label}
-                    icon={icon}
-                    audio={audio}
-                    playing={playing}
-                    onToggle={toggleSound}
-                  />
-                )
-            )}
-          </Tooltip.Provider>
+          <div
+            className="col-start-2 flex items-center gap-3 sm:gap-4"
+            key={`${bird.cardBackground}-${autoPlay.activation}`}
+          >
+            <Tooltip.Provider>
+              {soundTypes.map(
+                ({ key, label, icon }) =>
+                  bird[key].length > 0 && (
+                    <SoundButton
+                      key={key}
+                      paths={bird[key]}
+                      label={label}
+                      icon={icon}
+                      audio={audio}
+                      playing={playing}
+                      onToggle={toggleSound}
+                    />
+                  )
+              )}
+            </Tooltip.Provider>
+          </div>
+          <label
+            htmlFor="auto-play"
+            className="col-start-3 mt-1 ml-4 inline-flex min-h-12 w-11 cursor-pointer flex-col items-center justify-center gap-1 justify-self-start text-[9px]/none whitespace-nowrap select-none sm:ml-6"
+          >
+            <Switch
+              id="auto-play"
+              size="sm"
+              nativeButton
+              render={<button type="button" />}
+              checked={autoPlay.enabled}
+              onCheckedChange={(enabled) => {
+                setAutoPlay(({ activation }) => ({
+                  enabled,
+                  activation: activation + Number(enabled),
+                }))
+                if (enabled) playFirstSound(selected)
+              }}
+            />
+            Auto-play
+          </label>
         </div>
         <p
           id="sound-instructions"
