@@ -124,13 +124,44 @@ try {
   assert.equal((await layout()).width, 0)
   assert.equal(await skip.count(), 0)
 
-  await row.getByRole("switch").press("Space")
+  const autoPlay = row.getByRole("switch")
+  const player = page.locator("audio")
+  const finishRecording = () =>
+    player.evaluate((audio) => {
+      const ended = new Promise((resolve) =>
+        audio.addEventListener("ended", () => resolve(), { once: true })
+      )
+      audio.currentTime = audio.duration
+      return ended
+    })
+
+  await page.emulateMedia({ reducedMotion: "no-preference" })
+  await autoPlay.press("Space")
+  await row.getByRole("button", { name: "Song", pressed: true }).waitFor()
+  await finishRecording()
+  await call(1, true).waitFor()
+  await finishRecording()
+  await call(2, true).waitFor()
+  await finishRecording()
+  await row
+    .getByRole("button", { name: "Bill rattle", pressed: true })
+    .waitFor()
+  await finishRecording()
+
+  const plover = page.getByRole("group", {
+    name: "Tibetan Sand Plover recordings",
+  })
+  await plover.getByRole("button", { name: "Call", pressed: true }).waitFor()
+  await plover.getByRole("switch").press("Space")
+  await finishRecording()
+  await plover.getByRole("button", { name: "Call", pressed: false }).waitFor()
+  assert.equal(new URL(page.url()).hash, "#tibetan-sand-plover")
+
+  await page.getByRole("button", { name: "Previous bird" }).press("Enter")
+  await autoPlay.press("Space")
   await row.getByRole("button", { name: "Song", pressed: true }).waitFor()
   await page.getByRole("button", { name: "Next bird" }).press("Enter")
-  await page
-    .getByRole("group", { name: "Tibetan Sand Plover recordings" })
-    .getByRole("button", { name: "Call", pressed: true })
-    .waitFor()
+  await plover.getByRole("button", { name: "Call", pressed: true }).waitFor()
 
   console.log("Recording controls passed in Chromium at 320 px")
 } finally {

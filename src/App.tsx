@@ -148,7 +148,11 @@ export function App() {
             </Button>
           </div>
         </div>
-        <RecordingControls bird={bird} ref={recordingControls} />
+        <RecordingControls
+          bird={bird}
+          onNextBird={() => step.current(1, false)}
+          ref={recordingControls}
+        />
       </div>
     </main>
   )

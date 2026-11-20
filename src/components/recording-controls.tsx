@@ -33,6 +33,7 @@ const soundTypes = [
 
 function SoundButton({
   paths,
+  index,
   label,
   icon,
   audio,
@@ -43,6 +44,7 @@ function SoundButton({
   onSkip,
 }: {
   paths: string[]
+  index: number
   label: string
   icon: ReactNode
   audio: RefObject<HTMLAudioElement | null>
@@ -50,9 +52,8 @@ function SoundButton({
   playbackTooltip: string | null
   onDismissPlaybackTooltip: () => void
   onToggle: (url: string) => void
-  onSkip: (url: string) => void
+  onSkip: (index: number) => void
 }) {
-  const [index, setIndex] = useState(0)
   const [announcement, setAnnouncement] = useState("")
   const [tooltipOpen, setTooltipOpen] = useState(false)
   const multiple = paths.length > 1
@@ -63,9 +64,8 @@ function SoundButton({
 
   function playNext() {
     const next = (index + 1) % paths.length
-    setIndex(next)
     setAnnouncement(`${label} ${next + 1} of ${paths.length}`)
-    onSkip(recordings[paths[next]])
+    onSkip(next)
   }
 
   return (
@@ -142,6 +142,14 @@ function SoundButton({
 
 type BirdRecordings = Record<(typeof soundTypes)[number]["key"], string[]>
 
+function playableSounds(bird: BirdRecordings) {
+  return soundTypes
+    .flatMap(({ key }) =>
+      bird[key].map((path, index) => ({ key, index, url: recordings[path] }))
+    )
+    .filter(({ url }) => url)
+}
+
 export type RecordingControlsHandle = {
   reset: () => void
   onCardSettled: (bird: BirdRecordings) => void
@@ -149,9 +157,11 @@ export type RecordingControlsHandle = {
 
 export function RecordingControls({
   bird,
+  onNextBird,
   ref,
 }: {
   bird: BirdRecordings & { id: string; name: string }
+  onNextBird: () => void
   ref: Ref<RecordingControlsHandle>
 }) {
   const audio = useRef<HTMLAudioElement>(null)
@@ -160,6 +170,9 @@ export function RecordingControls({
   const [playing, setPlaying] = useState<string | null>(null)
   const [playbackTooltip, setPlaybackTooltip] = useState<string | null>(null)
   const [failed, setFailed] = useState(false)
+  const [indices, setIndices] = useState<
+    Partial<Record<keyof BirdRecordings, number>>
+  >({})
   const [autoPlay, setAutoPlay] = useState({ enabled: false, activation: 0 })
 
   function clearPlaybackTooltip() {
@@ -198,13 +211,29 @@ export function RecordingControls({
   }
 
   function playFirstSound(bird: BirdRecordings) {
-    for (const { key } of soundTypes) {
-      const url = recordings[bird[key][0]]
-      if (url) {
-        skipPending.current = false
-        playSound(url)
-        return
-      }
+    const first = playableSounds(bird)[0]
+    skipPending.current = false
+    setIndices(first ? { [first.key]: first.index } : {})
+    if (first) playSound(first.url)
+  }
+
+  function onSoundEnded(player: HTMLAudioElement) {
+    if (!player.ended) return
+    stopPlayback()
+    if (!autoPlay.enabled) return
+
+    const sounds = playableSounds(bird)
+    const finished = sounds.findIndex(
+      ({ url }) => url === player.getAttribute("src")
+    )
+    if (finished === -1) return
+
+    const next = sounds[finished + 1]
+    if (next) {
+      setIndices((current) => ({ ...current, [next.key]: next.index }))
+      playSound(next.url)
+    } else {
+      onNextBird()
     }
   }
 
@@ -215,6 +244,7 @@ export function RecordingControls({
       player.removeAttribute("src")
       player.load()
       stopPlayback()
+      setIndices({})
       setFailed(false)
     },
     onCardSettled(bird) {
@@ -248,6 +278,7 @@ export function RecordingControls({
                   <SoundButton
                     key={key}
                     paths={bird[key]}
+                    index={indices[key] ?? 0}
                     label={label}
                     icon={icon}
                     audio={audio}
@@ -255,7 +286,10 @@ export function RecordingControls({
                     playbackTooltip={playbackTooltip}
                     onDismissPlaybackTooltip={clearPlaybackTooltip}
                     onToggle={toggleSound}
-                    onSkip={skipTo}
+                    onSkip={(index) => {
+                      setIndices((current) => ({ ...current, [key]: index }))
+                      skipTo(recordings[bird[key][index]])
+                    }}
                   />
                 )
             )}
@@ -309,7 +343,7 @@ export function RecordingControls({
           // Keep Skip focused while its replacement source loads.
           if (event.currentTarget.paused && !skipPending.current) stopPlayback()
         }}
-        onEnded={stopPlayback}
+        onEnded={(event) => onSoundEnded(event.currentTarget)}
         onError={stopPlayback}
       />
     </>
