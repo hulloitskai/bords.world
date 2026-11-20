@@ -276,11 +276,6 @@
   background: color-mix(in oklab, var(--primary) 75%, var(--background));
 }
 
-.sound-instructions {
-  --muted-foreground: #5f604f;
-  font-family: system-ui, sans-serif;
-}
-
 .playback-ring {
   position: absolute;
   inset: 0;

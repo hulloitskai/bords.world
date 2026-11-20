@@ -7,7 +7,11 @@ import {
   useState,
 } from "react"
 import { Tooltip } from "@base-ui/react/tooltip"
-import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons"
+import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  SkipForwardIcon,
+} from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 
 import { BillRattleIcon } from "@/components/bill-rattle-icon"
@@ -44,6 +48,7 @@ function SoundButton({
   audio,
   playing,
   onToggle,
+  onPlay,
 }: {
   paths: string[]
   label: string
@@ -51,113 +56,79 @@ function SoundButton({
   audio: RefObject<HTMLAudioElement | null>
   playing: string | null
   onToggle: (url: string) => void
+  onPlay: (url: string) => void
 }) {
   const [index, setIndex] = useState(0)
   const [announcement, setAnnouncement] = useState("")
-  const press = useRef<{
-    id: number
-    x: number
-    y: number
-    time: number
-  } | null>(null)
-  const pointerAction = useRef<"next" | "ignore" | null>(null)
   const multiple = paths.length > 1
   const title = multiple ? `${label} ${index + 1} of ${paths.length}` : label
   const url = recordings[paths[index]]
   const active = playing === url
 
-  function cancelPress() {
-    if (!press.current) return
-    press.current = null
-    pointerAction.current = "ignore"
-  }
-
   function playNext() {
     const next = (index + 1) % paths.length
     setIndex(next)
-    setAnnouncement(`${label} ${next + 1}`)
-    onToggle(recordings[paths[next]])
+    setAnnouncement(`${label} ${next + 1} of ${paths.length}`)
+    onPlay(recordings[paths[next]])
   }
 
   return (
-    <Tooltip.Root>
-      <Tooltip.Trigger
-        delay={250}
-        closeOnClick={false}
-        render={
-          <Button
-            size="icon-xl"
-            variant="filled"
-            className="sound-button relative rounded-full motion-reduce:transition-none"
-            aria-label={title}
-            aria-pressed={active}
-            data-playing={active}
-            onPointerDown={(event) => {
-              if (!event.isPrimary || event.button !== 0) return
-              pointerAction.current = null
-              press.current = {
-                id: event.pointerId,
-                x: event.clientX,
-                y: event.clientY,
-                time: event.timeStamp,
-              }
-            }}
-            onPointerMove={(event) => {
-              const start = press.current
-              if (
-                start?.id === event.pointerId &&
-                Math.hypot(event.clientX - start.x, event.clientY - start.y) >
-                  10
-              ) {
-                cancelPress()
-              }
-            }}
-            onPointerUp={(event) => {
-              const start = press.current
-              if (start?.id !== event.pointerId) return
-              press.current = null
-              if (multiple && event.timeStamp - start.time >= 500)
-                pointerAction.current = "next"
-            }}
-            onPointerLeave={cancelPress}
-            onPointerCancel={cancelPress}
-            onLostPointerCapture={cancelPress}
-            onBlur={cancelPress}
-            onContextMenu={(event) => {
-              if (press.current) event.preventDefault()
-            }}
-            onClick={(event) => {
-              const action = event.detail > 0 ? pointerAction.current : null
-              pointerAction.current = null
-              if (action === "next") playNext()
-              if (action === null) onToggle(url)
-            }}
+    <div className="flex items-center">
+      <Tooltip.Root>
+        <Tooltip.Trigger
+          delay={250}
+          closeOnClick={false}
+          render={
+            <Button
+              size="icon-xl"
+              variant="filled"
+              className="sound-button relative rounded-full motion-reduce:transition-none"
+              aria-label={title}
+              aria-pressed={active}
+              data-playing={active}
+              onClick={() => onToggle(url)}
+            />
+          }
+        >
+          {icon}
+          <PlaybackRing
+            audio={audio}
+            url={url}
+            count={paths.length}
+            index={index}
           />
-        }
-      >
-        {icon}
-        <PlaybackRing
-          audio={audio}
-          url={url}
-          count={paths.length}
-          index={index}
-        />
-      </Tooltip.Trigger>
-      <span className="sr-only" aria-live="polite">
-        {announcement}
-      </span>
-      <Tooltip.Portal>
-        <Tooltip.Positioner side="top" sideOffset={8} className="z-10">
-          <Tooltip.Popup
-            role="tooltip"
-            className="sound-tooltip rounded-md bg-primary px-2 py-1 text-xs text-primary-foreground"
-          >
-            {title}
-            <Tooltip.Arrow className="size-2 rotate-45 bg-primary data-[side=bottom]:-top-1 data-[side=left]:-right-1 data-[side=right]:-left-1 data-[side=top]:-bottom-1" />
-          </Tooltip.Popup>
-        </Tooltip.Positioner>
-      </Tooltip.Portal>
-    </Tooltip.Root>
+        </Tooltip.Trigger>
+        <span className="sr-only" aria-live="polite">
+          {announcement}
+        </span>
+        <Tooltip.Portal>
+          <Tooltip.Positioner side="top" sideOffset={8} className="z-10">
+            <Tooltip.Popup
+              role="tooltip"
+              className="sound-tooltip rounded-md bg-primary px-2 py-1 text-xs text-primary-foreground"
+            >
+              {title}
+              <Tooltip.Arrow className="size-2 rotate-45 bg-primary data-[side=bottom]:-top-1 data-[side=left]:-right-1 data-[side=right]:-left-1 data-[side=top]:-bottom-1" />
+            </Tooltip.Popup>
+          </Tooltip.Positioner>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+      {multiple && (
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          className="group/skip h-11 hover:bg-transparent focus-visible:border-transparent focus-visible:ring-0 active:not-aria-[haspopup]:translate-y-0 dark:hover:bg-transparent"
+          aria-label={`Play next ${label.toLowerCase()} recording`}
+          onClick={playNext}
+        >
+          <HugeiconsIcon
+            icon={SkipForwardIcon}
+            aria-hidden="true"
+            className="size-4 text-black/50 group-hover/skip:text-black/85 group-focus-visible/skip:text-black/85 forced-colors:group-focus-visible/skip:[forced-color-adjust:none] forced-colors:group-focus-visible/skip:text-[Highlight]"
+          />
+        </Button>
+      )}
+    </div>
   )
 }
 
@@ -497,7 +468,6 @@ export function App() {
           className="mt-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center"
           role="group"
           aria-label={`${bird.name} recordings`}
-          aria-describedby="sound-instructions"
         >
           <div
             className="col-start-2 flex items-center gap-3 sm:gap-4"
@@ -515,6 +485,7 @@ export function App() {
                       audio={audio}
                       playing={playing}
                       onToggle={toggleSound}
+                      onPlay={playSound}
                     />
                   )
               )}
@@ -541,12 +512,6 @@ export function App() {
             Auto-play
           </label>
         </div>
-        <p
-          id="sound-instructions"
-          className="sound-instructions mt-2 text-center text-xs text-muted-foreground/80"
-        >
-          tap to play/pause; long-hold to play next
-        </p>
         {failed && (
           <p className="text-center text-sm" role="status">
             Couldn’t play the recording.
