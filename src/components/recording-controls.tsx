@@ -306,11 +306,17 @@ export function RecordingControls({
             render={<button type="button" />}
             checked={autoPlay.enabled}
             onCheckedChange={(enabled) => {
+              const player = audio.current!
+              const currentSound = player.ended
+                ? null
+                : player.getAttribute("src")
               setAutoPlay(({ activation }) => ({
                 enabled,
-                activation: activation + Number(enabled),
+                activation: activation + Number(enabled && !currentSound),
               }))
-              if (enabled) playFirstSound(bird)
+              if (!enabled) return
+              if (!currentSound) playFirstSound(bird)
+              else if (player.paused) playSound(currentSound)
             }}
           />
           Auto-play

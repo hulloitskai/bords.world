@@ -22,7 +22,7 @@ try {
   const tooltip = (index) =>
     page
       .locator('[role="tooltip"][data-open]')
-      .getByText(`Call ${index} of 2`, { exact: true })
+      .getByText(`Call #${index}`, { exact: true })
   const slot = row.locator("[data-skip-visible]")
   const layout = () =>
     slot.evaluate((element) => ({
@@ -136,6 +136,33 @@ try {
     })
 
   await page.emulateMedia({ reducedMotion: "no-preference" })
+  await call(1).tap()
+  await call(1, true).waitFor()
+  await page.waitForFunction(
+    () => document.querySelector("audio").currentTime > 0.2
+  )
+  const activeRecording = await player.evaluate((audio) => audio.src)
+  await autoPlay.press("Space")
+  assert.deepEqual(
+    await player.evaluate((audio) => ({
+      src: audio.src,
+      stillPlaying: !audio.paused && audio.currentTime > 0.2,
+    })),
+    { src: activeRecording, stillPlaying: true }
+  )
+  await autoPlay.press("Space")
+  await call(1).tap()
+  await call(1, false).waitFor()
+  const pausedAt = await player.evaluate((audio) => audio.currentTime)
+  await autoPlay.press("Space")
+  await call(1, true).waitFor()
+  assert.ok(
+    await player.evaluate((audio, time) => audio.currentTime >= time, pausedAt)
+  )
+  await finishRecording()
+  await call(2, true).waitFor()
+
+  await page.reload()
   await autoPlay.press("Space")
   await row.getByRole("button", { name: "Song", pressed: true }).waitFor()
   await finishRecording()
