@@ -318,6 +318,7 @@
 
 @media (max-width: 600px) {
   .bird-carousel {
+    --center-selected-card: 1;
     --fan-height: calc(var(--resting-fan-height) + 2 * var(--motion-clearance));
     --fan-frame-width: max(960px, 100cqw);
     /* The active card can move up to half a step before the selection changes. */

@@ -292,11 +292,17 @@ export function App() {
           Math.max(0, (visibleDistance - distance) * 2)
         )
         const { x, y, rotation, scale } = cardPose(offset, fanSpread)
+        const translateY = ((y + bounds.centerY) / cardRatio) * 100
+        // Center the mobile focal card and taper the shift to zero at the fan's edge.
+        const centerOffset =
+          ((frontLift - bounds.centerY) / cardRatio) *
+          100 *
+          Math.max(0, 1 - (distance / visibleDistance) ** 2)
         card.style.opacity = String(opacity)
         card.style.transform =
           opacity === 0
             ? "none"
-            : `translate(${x * 100}%, ${((y + bounds.centerY) / cardRatio) * 100}%) rotate(${rotation}deg) scale(${scale})`
+            : `translate(${x * 100}%, calc(${translateY}% + ${centerOffset}% * var(--center-selected-card, 0))) rotate(${rotation}deg) scale(${scale})`
         card.style.zIndex = String(
           index === front
             ? count * 100 + 1
