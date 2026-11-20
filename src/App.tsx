@@ -10,7 +10,7 @@ import { Tooltip } from "@base-ui/react/tooltip"
 import {
   ArrowLeft01Icon,
   ArrowRight01Icon,
-  SkipForwardIcon,
+  Forward02Icon,
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 
@@ -122,9 +122,9 @@ function SoundButton({
           onClick={playNext}
         >
           <HugeiconsIcon
-            icon={SkipForwardIcon}
+            icon={Forward02Icon}
             aria-hidden="true"
-            className="size-4 text-black/50 group-hover/skip:text-black/85 group-focus-visible/skip:text-black/85 forced-colors:group-focus-visible/skip:[forced-color-adjust:none] forced-colors:group-focus-visible/skip:text-[Highlight]"
+            className="size-4 text-black/50 group-hover/skip:text-black/85 group-focus-visible/skip:text-black/85 forced-colors:group-focus-visible/skip:text-[Highlight] forced-colors:group-focus-visible/skip:[forced-color-adjust:none]"
           />
         </Button>
       )}
