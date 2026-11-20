@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import birds from "./birds.json"
 import { cardArtwork, cardStyleAt, fanSizing } from "./deck-geometry"
+import { connectDeckNavigation, wrapDeckPosition } from "./deck-navigation"
 
 const images = import.meta.glob<string>("./assets/cards/*.png", {
   eager: true,
@@ -39,7 +40,6 @@ const soundTypes = [
   { key: "billRattles", label: "Bill rattle", icon: <BillRattleIcon /> },
 ] as const
 const count = birds.length
-const wrap = (index: number) => ((index % count) + count) % count
 
 function SoundButton({
   paths,
@@ -179,7 +179,6 @@ export function App() {
     const deck = stage.current!
     const player = audio.current!
     const cards = Array.from(deck.querySelectorAll("img"))
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)")
     const controls = navigation.current!
     const layout = controls.parentElement!
 
@@ -193,25 +192,7 @@ export function App() {
     measureControls()
     const controlsObserver = new ResizeObserver(measureControls)
     controlsObserver.observe(controls)
-    let position = 0
-    let target = 0
-    let current = 0
-    let settled = 0
-    let frame = 0
-    let wheelTimer: number | undefined
-    let wheelPosition = 0
     let observedHash = window.location.hash
-    let drag:
-      | {
-          id: number
-          origin: number
-          x: number
-          lastX: number
-          time: number
-          speed: number
-          pixelsPerCard: number
-        }
-      | undefined
 
     function syncPage(index: number) {
       const { id, name } = birds[index]
@@ -223,15 +204,15 @@ export function App() {
       observedHash = hash
     }
 
-    function draw(value: number) {
-      position = value
-      const front = wrap(Math.round(value))
-      cards.forEach((card, index) => {
-        const offset = wrap(index - value + count / 2) - count / 2
-        Object.assign(card.style, cardStyleAt(offset, index === front, count))
-      })
-      if (current !== front) {
-        current = front
+    const deckNavigation = connectDeckNavigation(deck, cards, {
+      onPosition(value, front) {
+        cards.forEach((card, index) => {
+          const offset =
+            wrapDeckPosition(index - value + count / 2, count) - count / 2
+          Object.assign(card.style, cardStyleAt(offset, index === front, count))
+        })
+      },
+      onSelect(front) {
         player.pause()
         player.removeAttribute("src")
         player.load()
@@ -239,135 +220,10 @@ export function App() {
         setFailed(false)
         setSelected(front)
         syncPage(front)
-      }
-    }
-
-    function stop() {
-      window.cancelAnimationFrame(frame)
-      window.clearTimeout(wheelTimer)
-      wheelTimer = undefined
-    }
-
-    function finishSettling(next: number) {
-      const index = wrap(next)
-      draw(index)
-      target = position
-      if (index !== settled) {
-        settled = index
-        playSettledBird(index)
-      }
-    }
-
-    function settle(next: number, instant = false) {
-      stop()
-      target = next
-      const origin = position
-      if (instant || reduced.matches || origin === next) {
-        finishSettling(next)
-        return
-      }
-      const start = performance.now()
-      function tick(now: number) {
-        const progress = Math.min(1, (now - start) / 260)
-        if (progress === 1) {
-          finishSettling(next)
-          return
-        }
-        draw(origin + (next - origin) * (1 - (1 - progress) ** 3))
-        frame = window.requestAnimationFrame(tick)
-      }
-      frame = window.requestAnimationFrame(tick)
-    }
-
-    step.current = (direction, instant) => {
-      if (!drag)
-        settle(
-          (wheelTimer === undefined ? target : Math.round(wheelPosition)) +
-            direction,
-          instant
-        )
-    }
-
-    function onKey(event: KeyboardEvent) {
-      if (
-        event.defaultPrevented ||
-        event.altKey ||
-        event.ctrlKey ||
-        event.metaKey
-      )
-        return
-      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return
-      event.preventDefault()
-      step.current(event.key === "ArrowLeft" ? -1 : 1, true)
-    }
-
-    function onWheel(event: WheelEvent) {
-      if (event.ctrlKey || event.metaKey || drag) return
-      const page = document.documentElement
-      if (page.scrollHeight > page.clientHeight) return
-      const delta =
-        Math.abs(event.deltaX) > Math.abs(event.deltaY)
-          ? event.deltaX
-          : event.deltaY
-      if (!delta) return
-      event.preventDefault()
-      if (wheelTimer === undefined) wheelPosition = position
-      stop()
-      const unit =
-        event.deltaMode === 1
-          ? 40
-          : event.deltaMode === 2
-            ? deck.clientWidth
-            : 1
-      wheelPosition += Math.max(-1.5, Math.min(1.5, (delta * unit) / 120))
-      if (!reduced.matches) draw(wheelPosition)
-      wheelTimer = window.setTimeout(
-        () => settle(Math.round(wheelPosition)),
-        110
-      )
-    }
-
-    function onDown(event: PointerEvent) {
-      if (!event.isPrimary || event.button !== 0) return
-      stop()
-      drag = {
-        id: event.pointerId,
-        origin: position,
-        x: event.clientX,
-        lastX: event.clientX,
-        time: event.timeStamp,
-        speed: 0,
-        pixelsPerCard: Math.max(cards[0].offsetWidth * 0.55, 110),
-      }
-      deck.setPointerCapture(event.pointerId)
-    }
-
-    function onMove(event: PointerEvent) {
-      if (!drag || event.pointerId !== drag.id) return
-      drag.speed =
-        (drag.lastX - event.clientX) / Math.max(8, event.timeStamp - drag.time)
-      drag.lastX = event.clientX
-      drag.time = event.timeStamp
-      if (!reduced.matches)
-        draw(drag.origin + (drag.x - event.clientX) / drag.pixelsPerCard)
-    }
-
-    function onEnd(event: PointerEvent) {
-      if (!drag || event.pointerId !== drag.id) return
-      const flick =
-        event.timeStamp - drag.time < 65
-          ? Math.max(-70, Math.min(70, drag.speed * 90))
-          : 0
-      const next =
-        event.type === "pointerup"
-          ? Math.round(
-              drag.origin +
-                (drag.x - event.clientX + flick) / drag.pixelsPerCard
-            )
-          : Math.round(position)
-      drag = undefined
-      settle(next)
-    }
+      },
+      onSettle: playSettledBird,
+    })
+    step.current = deckNavigation.step
 
     function onHashChange() {
       observedHash = window.location.hash
@@ -375,36 +231,17 @@ export function App() {
         0,
         birds.findIndex(({ id }) => `#${id}` === observedHash)
       )
-      const pointerId = drag?.id
-      drag = undefined
-      if (pointerId !== undefined && deck.hasPointerCapture(pointerId)) {
-        deck.releasePointerCapture(pointerId)
-      }
-      settle(next, true)
+      deckNavigation.jumpTo(next)
       syncPage(next)
     }
 
     onHashChange()
     window.addEventListener("hashchange", onHashChange)
-    window.addEventListener("keydown", onKey)
-    window.addEventListener("wheel", onWheel, { passive: false })
-    deck.addEventListener("pointerdown", onDown)
-    deck.addEventListener("pointermove", onMove)
-    deck.addEventListener("pointerup", onEnd)
-    deck.addEventListener("pointercancel", onEnd)
-    deck.addEventListener("lostpointercapture", onEnd)
     return () => {
-      stop()
+      deckNavigation.disconnect()
       player.pause()
       controlsObserver.disconnect()
       window.removeEventListener("hashchange", onHashChange)
-      window.removeEventListener("keydown", onKey)
-      window.removeEventListener("wheel", onWheel)
-      deck.removeEventListener("pointerdown", onDown)
-      deck.removeEventListener("pointermove", onMove)
-      deck.removeEventListener("pointerup", onEnd)
-      deck.removeEventListener("pointercancel", onEnd)
-      deck.removeEventListener("lostpointercapture", onEnd)
     }
   }, [])
 
